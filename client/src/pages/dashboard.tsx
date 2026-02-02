@@ -3,8 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { GraduationCap, User, LogOut, BookOpen, TrendingUp, Users, Calendar, Download, Target, Bot, BarChart3, Trophy, Brain, ClipboardList } from "lucide-react";
-import logoPath from "@assets/Design ohne Titel (1)_1752353023318.png";
+import { GraduationCap, LogOut, TrendingUp, Users, Calendar, Download, Target, BarChart3, Trophy, Brain, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StatsOverview from "@/components/stats-overview";
@@ -14,13 +13,10 @@ import UserManagement from "@/components/user-management";
 import HomeworkForm from "@/components/homework-form";
 import HomeworkList from "@/components/homework-list";
 import CalendarView from "@/components/calendar-view";
-import EventForm from "@/components/event-form";
 import DashboardStats from "@/components/dashboard-stats";
 import SearchBar from "@/components/search-bar";
 import ExportData from "@/components/export-data";
 import NotificationSystem from "@/components/notification-system";
-import QuickActions from "@/components/quick-actions";
-import ProductivityTracker from "@/components/productivity-tracker";
 import AnimatedBackground from "@/components/animated-background";
 import AchievementSystem from "@/components/achievement-system";
 import GradeAnalytics from "@/components/grade-analytics";
@@ -59,9 +55,6 @@ export default function Dashboard() {
 
   // Search functionality
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Calendar functionality
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | null>(null);
 
   // Memoize filtered data to prevent infinite renders
   const filteredGrades = useMemo(() => {
@@ -86,6 +79,21 @@ export default function Dashboard() {
       (hw.description && hw.description.toLowerCase().includes(query))
     );
   }, [searchQuery, homework]);
+
+  const pendingHomeworkCount = useMemo(() => homework.filter((task) => !task.isCompleted).length, [homework]);
+  const overdueHomeworkCount = useMemo(() => {
+    const now = new Date();
+    return homework.filter((task) => !task.isCompleted && new Date(task.dueDate) < now).length;
+  }, [homework]);
+  const todayLabel = useMemo(
+    () =>
+      new Intl.DateTimeFormat("de-DE", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+      }).format(new Date()),
+    []
+  );
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -211,6 +219,38 @@ export default function Dashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-4">
+        <div className="rounded-lg border border-cyan-500/20 bg-black/70 p-4 text-cyan-100 shadow-lg">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm text-cyan-400">Willkommen zurück</p>
+              <h2 className="text-xl font-semibold text-cyan-100">
+                {user?.user?.username ?? "Nutzer"} · {todayLabel}
+              </h2>
+              <p className="text-sm text-cyan-300">
+                {pendingHomeworkCount} offene Aufgaben · {overdueHomeworkCount} überfällig
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveTab("homework")}
+                className="bg-black/40 text-cyan-200 hover:bg-cyan-500/20 hover:text-cyan-100 border-cyan-500/30"
+              >
+                Hausaufgaben prüfen
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveTab("calendar")}
+                className="bg-black/40 text-cyan-200 hover:bg-cyan-500/20 hover:text-cyan-100 border-cyan-500/30"
+              >
+                Kalender öffnen
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Notification System - Only on Overview Tab */}
         {activeTab === "overview" && (
           <div className="mt-6 mb-6">
@@ -361,10 +401,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">
-            <CalendarView 
-              homework={homework} 
-              onDateSelect={setSelectedCalendarDate}
-            />
+            <CalendarView homework={homework} />
           </TabsContent>
 
           <TabsContent value="planner" className="space-y-6">

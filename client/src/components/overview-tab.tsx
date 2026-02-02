@@ -1,7 +1,5 @@
-import React from 'react';
 import QuickActions from "@/components/quick-actions";
 import ProductivityTracker from "@/components/productivity-tracker";
-import DashboardStats from "@/components/dashboard-stats";
 import type { Grade, Homework } from "@shared/schema";
 
 interface OverviewTabProps {
