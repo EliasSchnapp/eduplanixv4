@@ -92,11 +92,9 @@ export default function EventForm({ selectedDate, onClose, isModal = false }: Ev
         startDate: finalStartDate.toISOString(),
         endDate: finalEndDate.toISOString(),
       };
-      
-      console.log("Submitting event data:", eventData);
+
       await createEventMutation.mutateAsync(eventData);
     } catch (error) {
-      console.error("Submit error:", error);
       toast({
         title: "Fehler beim Senden",
         description: "Bitte prüfen Sie Ihre Eingaben.",
@@ -105,10 +103,6 @@ export default function EventForm({ selectedDate, onClose, isModal = false }: Ev
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const formatDateForInput = (date: Date) => {
-    return date.toISOString().slice(0, 16);
   };
 
   const eventTypes = [
@@ -328,11 +322,6 @@ export default function EventForm({ selectedDate, onClose, isModal = false }: Ev
               type="submit"
               disabled={isSubmitting || createEventMutation.isPending}
               className="bg-black text-cyan-300 hover:bg-cyan-500/20 hover:text-cyan-100 border border-cyan-500/30"
-              onClick={(e) => {
-                console.log("Button clicked");
-                console.log("Form errors:", form.formState.errors);
-                console.log("Form values:", form.getValues());
-              }}
             >
               {isSubmitting || createEventMutation.isPending ? (
                 <>
